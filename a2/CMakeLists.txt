@@ -4,4 +4,4 @@ project(a2 C)
 set(CMAKE_C_STANDARD 11)
 
 add_executable(a2
-        a2.c)
+        a2.c pid.h pid.c)
