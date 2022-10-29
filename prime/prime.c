@@ -16,5 +16,7 @@ void sigterm(int signal){
 
 void main(int argc, char **argv){
     signal(SIGTSTP, sigtstp);
+    signal(SIGCONT, sigcont);
+    signal(SIGTERM, sigterm);
 
 }
