@@ -11,16 +11,29 @@
 
 long unsigned int prime = 0;
 int namePID, pid;
-int printFlag = 0;
 
 void sigtstp(int signal){
-    printFlag = 1;
+    printf("Process %d: my PID is %d: I am about to be suspended...\n", namePID, pid);
+    if(prime != 0) {
+        printf("Highest prime number I found is %lu.\n", prime);
+    }else{
+        printf("No prime found yet.\n");
+    }
+
+    fflush(stdout);
 }
 void sigcont(int signal){
-    printFlag = 2;
+    printf("Process %d: my PID is %d: I just got resumed.\n", namePID, pid);
+    fflush(stdout);
 }
 void sigterm(int signal){
-    printFlag = 3;
+    printf("Process %d: my PID is %d: I completed my task\n", namePID, pid);
+    if(prime != 0) {
+        printf("and I am exiting. Highest prime number I found is %lu.\n", prime);
+    }else{
+        printf("and I am exiting. Never found a prime number.\n");
+    }
+    fflush(stdout);
 }
 
 long unsigned int get10DigitRandom(){
@@ -79,20 +92,6 @@ void main(int argc, char **argv){
            "number %lu to find the next prime number.\n", namePID, pid, number);
 
     while(1){
-        if(printFlag == 1){
-            printf("Process %d: my PID is %d: I am about to be suspended... Highest prime\n"
-                   "number I found is %lu.\n", namePID, pid, prime);
-            while(printFlag != 2){}
-            printf("Process %d: my PID is %d: I just got resumed.\n", namePID, pid);
-
-            printFlag = 0;
-        }else if(printFlag == 3){
-            printf("Process %d: my PID is %d: I completed my task and I am exiting.\n"
-                   "Highest prime number I found is %lu.\n", namePID, pid, prime);
-
-            printFlag = 0;
-        }
-
         if(checkPrime(number)){
             prime = number;
         }

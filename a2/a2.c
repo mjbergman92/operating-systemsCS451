@@ -16,6 +16,8 @@ int doPrint = 0;
 int prevPID = -1;
 
 void sigalrm(int signal){
+    printf("\nScheduler: Time Now: %d second\n", loops * quantum);
+
     // suspend or terminate currently running process, if there is one running
     prevPID = -1;
     if(pid != NULL){
@@ -60,7 +62,15 @@ void sigalrm(int signal){
         kill(pid->pid, SIGCONT);
     }
 
-    doPrint = 1;
+    if(prevPID == -1) {
+        //starting process when pid == NULL
+        printf( "Scheduling to Process %d (Pid %d) for the time slice of %d seconds.\n", pid->namePID, pid->pid, quantum);
+    }else{
+        //for processes with pid != NULL
+        printf("Suspending Process %d and scheduling Process %d (Pid %d)\n", prevPID, pid->namePID, pid->pid);
+        printf("for the time slice of %d seconds.\n", quantum);
+    }
+
     loops++;
 }
 
@@ -115,19 +125,5 @@ void main(int argc, char **argv){
     setupAlarm();
 
     while(1) {
-        if(doPrint){
-            printf("\nScheduler: Time Now: %d second\n", loops * quantum);
-
-            if(prevPID == -1) {
-                //starting process when pid == NULL
-                printf( "Scheduling to Process %d (Pid %d) for the time slice of %d seconds.\n", pid->namePID, pid->pid, quantum);
-            }else{
-                //for processes with pid != NULL
-                printf("Suspending Process %d and scheduling Process %d (Pid %d) for the time\n"
-                                       "slice of %d seconds.\n", prevPID, pid->namePID, pid->pid, quantum);
-            }
-
-            doPrint = 0;
-        }
     };
 }
