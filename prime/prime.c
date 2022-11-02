@@ -79,28 +79,24 @@ void main(int argc, char **argv){
            "number %lu to find the next prime number.\n", namePID, pid, number);
 
     while(1){
+        if(printFlag == 1){
+            printf("Process %d: my PID is %d: I am about to be suspended... Highest prime\n"
+                   "number I found is %lu.\n", namePID, pid, prime);
+            while(printFlag != 2){}
+            printf("Process %d: my PID is %d: I just got resumed.\n", namePID, pid);
+
+            printFlag = 0;
+        }else if(printFlag == 3){
+            printf("Process %d: my PID is %d: I completed my task and I am exiting.\n"
+                   "Highest prime number I found is %lu.\n", namePID, pid, prime);
+
+            printFlag = 0;
+        }
+
         if(checkPrime(number)){
             prime = number;
         }
         number++;
-
-        switch(printFlag){
-            case 1:
-                printf("Process %d: my PID is %d: I am about to be suspended... Highest prime\n"
-                    "number I found is %lu.\n", namePID, pid, prime);
-                break;
-            case 2:
-                printf("Process %d: my PID is %d: I just got resumed.\n", namePID, pid);
-                break;
-            case 3:
-                printf("Process %d: my PID is %d: I completed my task and I am exiting.\n"
-                    "Highest prime number I found is %lu.\n", namePID, pid, prime);
-                break;
-            default:
-                break;
-        }
-
-        printFlag = 0;
     }
 }
 
