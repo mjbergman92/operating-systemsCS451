@@ -11,25 +11,38 @@
 
 long unsigned int prime = 0;
 int namePID, pid;
-int printFlag = 0;
 
 /*
     Flag for Signaling a stop to the child
  */
 void sigtstp(int signal){
-    printFlag = 1;
+    printf("Process %d: my PID is %d: I am about to be suspended...\n", namePID, pid);
+    if(prime != 0) {
+        printf("Highest prime number I found is %lu.\n", prime);
+    }else{
+        printf("No prime found yet.\n");
+    }
+
+    fflush(stdout);
 }
 /*
     Flag for continuing an already running child
  */
 void sigcont(int signal){
-    printFlag = 2;
+    printf("Process %d: my PID is %d: I just got resumed.\n", namePID, pid);
+    fflush(stdout);
 }
 /*
     Flag for terminating a running child
  */
 void sigterm(int signal){
-    printFlag = 3;
+    printf("Process %d: my PID is %d: I completed my task\n", namePID, pid);
+    if(prime != 0) {
+        printf("and I am exiting. Highest prime number I found is %lu.\n", prime);
+    }else{
+        printf("and I am exiting. Never found a prime number.\n");
+    }
+    fflush(stdout);
 }
 
 /*
@@ -83,7 +96,9 @@ void setupSignals(){
     sa3.sa_handler = &sigterm;
     sigaction(SIGTERM, &sa3, NULL);
 }
-
+/*
+    inefficient prime finding algorithm for random 10 digit or greater number
+ */
 void main(int argc, char **argv){
     setupSignals();
 
@@ -104,26 +119,7 @@ void main(int argc, char **argv){
             prime = number;
         }
         number++;
-        /*
-            Switch statement to assess current flag state and print according to signal
-         */
-        switch(printFlag){
-            case 1:
-                printf("Process %d: my PID is %d: I am about to be suspended... Highest prime\n"
-                    "number I found is %lu.\n", namePID, pid, prime);
-                break;
-            case 2:
-                printf("Process %d: my PID is %d: I just got resumed.\n", namePID, pid);
-                break;
-            case 3:
-                printf("Process %d: my PID is %d: I completed my task and I am exiting.\n"
-                    "Highest prime number I found is %lu.\n", namePID, pid, prime);
-                break;
-            default:
-                break;
-        }
 
-        printFlag = 0;
     }
 }
 
