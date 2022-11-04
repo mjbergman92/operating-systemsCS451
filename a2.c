@@ -61,7 +61,7 @@ void sigalrm(int signal){
                 pid_str[i] = digit + '0';
             }
             pid_str[i] = '\0';
-            if(execl("./prime/cmake-build-debug/prime", "prime", pid_str, NULL) == -1){
+            if(execl("./prime", "prime", pid_str, NULL) == -1){
                 exit(-1);
             }
         }
