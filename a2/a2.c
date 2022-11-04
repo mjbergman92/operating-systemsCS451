@@ -1,3 +1,6 @@
+//
+// Created by malachi.bergman and koal.marcione on 10/28/2022.
+//
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -7,7 +10,9 @@
 #include "pid.h"
 
 #define LINE_MAX 40
-
+/*
+ initiating global  variables
+*/
 Queue *queue = NULL;
 PID *pid = NULL;
 int quantum;
@@ -113,7 +118,9 @@ void main(int argc, char **argv){
 
     setupTimer();
     setupAlarm();
-
+/*
+    Loop that controls main program and creation of children processes
+ */
     while(1) {
         if(doPrint){
             printf("\nScheduler: Time Now: %d second\n", loops * quantum);

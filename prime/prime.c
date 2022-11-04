@@ -1,5 +1,5 @@
 //
-// Created by malachi.bergman on 10/28/2022.
+// Created by malachi.bergman and koal.marcione on 10/28/2022.
 //
 
 #include <signal.h>
@@ -13,16 +13,28 @@ long unsigned int prime = 0;
 int namePID, pid;
 int printFlag = 0;
 
+/*
+    Flag for Signaling a stop to the child
+ */
 void sigtstp(int signal){
     printFlag = 1;
 }
+/*
+    Flag for continuing an already running child
+ */
 void sigcont(int signal){
     printFlag = 2;
 }
+/*
+    Flag for terminating a running child
+ */
 void sigterm(int signal){
     printFlag = 3;
 }
 
+/*
+    Generates a random 10 digit number to search for next Prime
+ */
 long unsigned int get10DigitRandom(){
     srand(time(NULL));
 
@@ -36,6 +48,9 @@ long unsigned int get10DigitRandom(){
     return output;
 }
 
+/*
+    Checks given number to see if it is prime
+ */
 int checkPrime(long unsigned int number){
     for(long unsigned int i = 2; i < number; i++){
         if(number % i == 0){
@@ -45,6 +60,9 @@ int checkPrime(long unsigned int number){
     return 1;
 }
 
+/*
+    Establish signals for Child Process
+ */
 void setupSignals(){
     struct sigaction sa1, sa2, sa3;
     /* Install timer_handler as the signal handler for SIGALRM. */
@@ -78,12 +96,17 @@ void main(int argc, char **argv){
     printf("Process %d: my PID is %d: I just got started. I am starting with the\n"
            "number %lu to find the next prime number.\n", namePID, pid, number);
 
+    /*
+        Loop that controls running child
+     */
     while(1){
         if(checkPrime(number)){
             prime = number;
         }
         number++;
-
+        /*
+            Switch statement to assess current flag state and print according to signal
+         */
         switch(printFlag){
             case 1:
                 printf("Process %d: my PID is %d: I am about to be suspended... Highest prime\n"
