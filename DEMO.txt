@@ -1,0 +1,62 @@
+This demo was run by compiling in CMake with the parameters being 'input.txt 5', where input.txt is the pid and times, and 5 is the slice number.
+
+Scheduler: Time Now: 0 second
+Scheduling to Process 0 (Pid 19590) for the time slice of 5 seconds.
+Process 0: my PID is 19590: I just got started. I am starting with the
+number 2868847118 to find the next prime number.
+
+Scheduler: Time Now: 5 second
+Process 0: my PID is 19590: I am about to be suspended...
+No prime found yet.
+Suspending Process 0 and scheduling Process 4 (Pid 19591)
+for the time slice of 5 seconds.
+Process 4: my PID is 19591: I just got started. I am starting with the
+number 8452592327 to find the next prime number.
+
+Scheduler: Time Now: 10 second
+Process 4: my PID is 19591: I am about to be suspended...
+No prime found yet.
+Suspending Process 4 and scheduling Process 6 (Pid 19592)
+for the time slice of 5 seconds.
+Process 6: my PID is 19592: I just got started. I am starting with the
+number 1120226421 to find the next prime number.
+
+Scheduler: Time Now: 15 second
+Process 6: my PID is 19592: I am about to be suspended...
+Highest prime number I found is 1120226423.
+Suspending Process 6 and scheduling Process 7 (Pid 19593)
+for the time slice of 5 seconds.
+Process 7: my PID is 19593: I just got started. I am starting with the
+number 9126259892 to find the next prime number.
+
+Scheduler: Time Now: 20 second
+Suspending Process 7 and scheduling Process 0 (Pid 19590)
+Process 0: my PID is 19590: I just got resumed.
+Process 7: my PID is 19593: I am about to be suspended...
+for the time slice of 5 seconds.
+No prime found yet.
+
+Scheduler: Time Now: 25 second
+Suspending Process 0 and scheduling Process 4 (Pid 19591)
+Process 0: my PID is 19590: I completed my task
+Process 4: my PID is 19591: I just got resumed.
+for the time slice of 5 seconds.
+and I am exiting. Highest prime number I found is 2868847169.
+
+Scheduler: Time Now: 30 second
+Suspending Process 4 and scheduling Process 6 (Pid 19592)
+Process 6: my PID is 19592: I just got resumed.
+Process 4: my PID is 19591: I completed my task
+for the time slice of 5 seconds.
+and I am exiting. Never found a prime number.
+
+Scheduler: Time Now: 35 second
+Suspending Process 6 and scheduling Process 7 (Pid 19593)
+Process 6: my PID is 19592: I completed my task
+Process 7: my PID is 19593: I just got resumed.
+for the time slice of 5 seconds.
+and I am exiting. Highest prime number I found is 1120226539.
+
+Scheduler: Time Now: 40 second
+Process 7: my PID is 19593: I completed my task
+and I am exiting. Never found a prime number.
