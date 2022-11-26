@@ -1,12 +1,11 @@
 /*
- * Program Created by Malachai Bergman and Koal Marcione
+ * Program Created by Malachi Bergman and Koal Marcione
  */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <semaphore.h>
 #include <pthread.h>
-#include "MakeMusic.c"
 
 /*
  * Program will take in a value which represents the number of "rooms" that can be occupied, number of composers, and number of vocalists
@@ -16,26 +15,31 @@
  * A composer will then increment a room value by 1 when they and a vocalist leave
  */
 
-int availableRooms;
-int composers;
-int vocalists;
-int maxWanderTime;
-int maxSoundRoomUsageTime;
-char delayOption;
+sem_t mutex;
+sem_t arr_mutex; // For writing to the arrays
+
+// arrays of IDs of vocalists and composers
+int *voc;
+int *comp;
+sem_t *matching_wait;
 
 int main(int argc, char *argv[]) {
     // Initialize command line arguments to variables
-    delayOption = argv[1];
-    vocalists = argv[2];
-    composers = argv[3];
-    availableRooms = argv[4];
-    maxWanderTime = argv[5];
-    maxSoundRoomUsageTime = argv[6];
+    char *delayOption = argv[1];
+    int vocalists = atoi(argv[2]);
+    int composers = atoi(argv[3]);
+    int availableRooms = atoi(argv[4]);
+    int maxWanderTime = atoi(argv[5]);
+    int maxSoundRoomUsageTime = atoi(argv[6]);
 
-    pthread_t thread_id[availableRooms];
+    // allocate and initialize lists to -1
+
+    // threads for vocalists and composers
+    pthread_t voc_id[vocalists];
+    pthread_t comp_id[composers];
 
     // Creates the blocking logic for available threads
-    sem_t mutex;
+
     sem_init(&mutex, 0, availableRooms);
 
 
@@ -62,9 +66,13 @@ int main(int argc, char *argv[]) {
     }
 
 
-    // Creates thread count equivalent to int of availableRooms
-    for (int i = 0; i < availableRooms; i++)
-        pthread_create(&thread_id [i], NULL, occupy_room, (void *) i);
+    // Creates thread count equivalent to int of vocalists
+    for (int i = 0; i < vocalists; i++)
+        pthread_create(&voc_id [i], NULL, vocalist, (void *) i);
+
+    // Creates thread count equivalent to int of composers
+    for (int i = 0; i < composers; i++)
+        pthread_create(&comp_id [i], NULL, composer, (void *) i);
 
     // Waits for all threads to finish executing
     for (int i = 0; i < availableRooms; i++)
@@ -73,38 +81,16 @@ int main(int argc, char *argv[]) {
 }
 
 // executes tasks
-void occupy_room(int i) {
-    // The occupation of a room with a vocalist and composer goes here
+void vocalist(int i) {
+    // if maxwandering != 0, then sleep
 
     // Returns to corresponding pthread_join issued in main()
     pthread_exit(0);
 }
 
-typedef struct {
-    int value;
-    struct process *list;
-} semaphore;
+void composer(int i) {
+    // The occupation of a room with a vocalist and composer goes here
 
-void wait(semaphore *S) {
-    S->value--;
-    if (S->value < 0) {
-        //add this process to S->list;
-        sleep();
-    }
+    // Returns to corresponding pthread_join issued in main()
+    pthread_exit(0);
 }
-
-void signal(semaphore *S) {
-    S->value++;
-    if (S->value <=0) {
-        //remove a process P from S->list;
-        wakeup(P);
-    }
-}
-
-typedef struct {
-
-} Vocalist;
-
-typedef struct {
-
-} Composer;
