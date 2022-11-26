@@ -14,6 +14,18 @@
  * A composer will decrement room value by 1 when they find a vocalist
  * A composer will then increment a room value by 1 when they and a vocalist leave
  */
+typedef struct Pair {
+    int voc;
+    int comp;
+    sem_t match;
+    sem_t finish;
+    struct Pair *next;
+} Pair;
+
+typedef struct PairList {
+    int size;
+    Pair *head;
+} PairList;
 
 int maxWanderTime;
 int maxSoundRoomUsageTime;
@@ -24,7 +36,14 @@ sem_t list_mutex;
 PairList *pList;
 
 PairList * createPairList();
+Pair * addPairToList(PairList *pl);
 Pair * createPair();
+
+Pair * findSearchingVoc(int comp);
+Pair * findSearchingComp(int voc);
+
+void vocalist(int i);
+void composer(int i);
 
 int main(int argc, char *argv[]) {
     // Initialize command line arguments to variables
@@ -43,7 +62,7 @@ int main(int argc, char *argv[]) {
     pthread_t voc_id[vocalists];
     pthread_t comp_id[composers];
 
-    plist = createPairList();
+    pList = createPairList();
 
     // Creates the blocking logic for available threads
 
@@ -58,13 +77,13 @@ int main(int argc, char *argv[]) {
         // If valid parameters and correct string, run the "-randomdelay" option
         // argv[5] is the maximum amount of time (in seconds) a vocalist and composer can wander and look for each other
         // argv[6] is the maximum amount of time (in seconds) a pair can use a room for
-    else if (argc = 7 && argv[1] == "-randomdelay") {
+    else if (argc == 7 && !strcmp(argv[1], "-randomdelay")) {
         maxWanderTime = atoi(argv[5]);
         maxSoundRoomUsageTime = atoi(argv[6]);
     }
         // If valid parameters and correct string, run the "-nodelay" option
         // No wait occurs in this block
-    else if (argc = 5 && argv[1] == "-nodelay") {
+    else if (argc == 5 && !strcmp(argv[1], "-nodelay")) {
 
     }
     else {
@@ -81,9 +100,13 @@ int main(int argc, char *argv[]) {
     for (int i = 0; i < composers; i++)
         pthread_create(&comp_id [i], NULL, composer, (void *) i);
 
+    // TODO handle finishing threads / joining
     // Waits for all threads to finish executing
-    for (int i = 0; i < availableRooms; i++)
-        pthread_join(thread_id[i], NULL);
+    for (int i = 0; i < vocalists; i++)
+        pthread_join(voc_id[i], NULL);
+
+    for (int i = 0; i < composers; i++)
+        pthread_join(comp_id[i], NULL);
     return 0;
 }
 
@@ -92,7 +115,7 @@ void vocalist(int i) {
     // if maxwandering != 0, then sleep
     printf("Vocalist %d: I am wandering...\n", i);
     if(maxWanderTime != 0){
-        //wander for random amount of time
+        //TODO wander for random amount of time
     }
 
     printf("Vocalist %d: I am ready to make music...\n", i);
@@ -101,24 +124,42 @@ void vocalist(int i) {
 
     if ((p = findSearchingComp(i)) != NULL){
         //add self to pair with composer
-
         //let matching composer know they have been matched via semaphore
 
         // wait for finish
+        sem_wait(&p->finish);
+
+        //TODO handle removing pair from PairList
     }else{
         //create a new pair
+        sem_wait(&list_mutex);
+
+        p = addPairToList(pList);
+
+        if (p == NULL){
+            printf("ERR_ Could Not Create New Pair!\n");
+        }
+
+        p->voc = i;
+
+        sem_post(&list_mutex);
 
         //wait for a match
+        sem_wait(&p->match);
 
-        printf("Vocalist %d and Composer %d found a sound proof room and are making music\n", pList->voc, pList->comp);
+        printf("Vocalist %d and Composer %d found a sound proof room and are making music\n", p->voc, p->comp);
 
         // find a room
+        sem_wait(&mutex);
 
         if(maxSoundRoomUsageTime != 0){
-            //wait in room for a random time
+            // TODO wait in room for a random time
         }
 
         // release room
+        sem_post(&mutex);
+
+        sem_post(&p->finish);
     }
 
     printf("Vocalist %d: I am leaving... Bye\n", i);
@@ -132,7 +173,7 @@ void composer(int i) {
     // if maxwandering != 0, then sleep
     printf("Composer %d: I am wandering...\n", i);
     if(maxWanderTime != 0){
-        //wander for random amount of time
+        //TODO wander for random amount of time
     }
 
     printf("Composer %d: I am ready to make music...\n", i);
@@ -141,24 +182,42 @@ void composer(int i) {
 
     if ((p = findSearchingVoc(i)) != NULL){
         //add self to pair with composer
-
         //let matching composer know they have been matched via semaphore
 
         // wait for finish
+        sem_wait(&p->finish);
+
+        //TODO handle removing pair from PairList
     }else{
         //create a new pair
+        sem_wait(&list_mutex);
+
+        p = addPairToList(pList);
+
+        if (p == NULL){
+            printf("ERR_ Could Not Create New Pair!\n");
+        }
+
+        p->comp = i;
+
+        sem_post(&list_mutex);
 
         //wait for a match
+        sem_wait(&p->match);
 
-        printf("Vocalist %d and Composer %d found a sound proof room and are making music\n", pList->voc, pList->comp);
+        printf("Vocalist %d and Composer %d found a sound proof room and are making music\n", p->voc, p->comp);
 
         // find a room
+        sem_wait(&mutex);
 
         if(maxSoundRoomUsageTime != 0){
-            //wait in room for a random time
+            //TODO wait in room for a random time
         }
 
         // release room
+        sem_post(&mutex);
+
+        sem_post(&p->finish);
     }
 
     printf("Composer %d: I am leaving... Bye\n", i);
@@ -166,19 +225,6 @@ void composer(int i) {
     // Returns to corresponding pthread_join issued in main()
     pthread_exit(0);
 }
-
-typedef struct PairList {
-    int size;
-    Pair *head;
-} PairList;
-
-typedef struct Pair {
-    int voc;
-    int comp;
-    sem_t match;
-    sem_t finish;
-    Pair *next;
-} Pair;
 
 PairList * createPairList(){
     PairList *pl;
@@ -207,6 +253,9 @@ Pair * addPairToList(PairList *pl){
 
     p->next = pl->head;
     pl->head = p;
+    pl->size++;
+
+    printf("Pair Added!\n");
 
     return p;
 }
@@ -216,6 +265,7 @@ Pair * findSearchingVoc(int comp) {
         return NULL;
     }
 
+    //loop through and check for any vocalist that needs a composer
     Pair *p = pList->head;
     if (p == NULL) {
         return NULL;
@@ -223,7 +273,9 @@ Pair * findSearchingVoc(int comp) {
 
     while(p != NULL){
         sem_wait(&list_mutex);
+        // following criteria for a vocalist looking for a composer
         if(p->voc != -1 && p->comp == -1){
+            //found a vocalist looking for composer, and matching pair made
             p->comp = comp;
             sem_post(&p->match);
             return p;
