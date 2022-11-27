@@ -258,7 +258,7 @@ PairList * createPairList(){
     return pl;
 }
 
-// Removes pair of composer and vocalist from list after music has made in room
+// Removes pairs of composer and vocalist from list after music has made in rooms and everything is done
 void freePairList(PairList *pl){
     if(pl == NULL){
         return;
