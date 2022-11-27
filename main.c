@@ -6,6 +6,8 @@
 #include <string.h>
 #include <semaphore.h>
 #include <pthread.h>
+#include <unistd.h>
+#include <time.h>
 
 /*
  * Program will take in a value which represents the number of "rooms" that can be occupied, number of composers, and number of vocalists
@@ -33,16 +35,13 @@ int maxSoundRoomUsageTime;
 
 sem_t mutex;
 sem_t list_mutex;
-
 PairList *pList;
 
 PairList * createPairList();
 Pair * addPairToList(PairList *pl);
 Pair * createPair();
-
 Pair * findSearchingVoc(int comp);
 Pair * findSearchingComp(int voc);
-
 void vocalist(int i);
 void composer(int i);
 
@@ -53,10 +52,14 @@ int main(int argc, char *argv[]) {
     int composers = atoi(argv[3]);
     int availableRooms = atoi(argv[4]);
 
+    //set seed to current time
+    srand(time(0));
+
     // Creates the blocking logic for available threads
     sem_init(&mutex, 0, availableRooms);
     sem_init(&list_mutex, 0, 1);
 
+    //create the PairList
     sem_wait(&list_mutex);
     pList = createPairList();
     sem_post(&list_mutex);
@@ -74,6 +77,7 @@ int main(int argc, char *argv[]) {
         // argv[5] is the maximum amount of time (in seconds) a vocalist and composer can wander and look for each other
         // argv[6] is the maximum amount of time (in seconds) a pair can use a room for
     else if (argc == 7 && !strcmp(argv[1], "-randomdelay")) {
+        //initialize additional command line arguments to variables
         maxWanderTime = atoi(argv[5]);
         maxSoundRoomUsageTime = atoi(argv[6]);
     }
@@ -104,6 +108,7 @@ int main(int argc, char *argv[]) {
     for (int i = 0; i < composers; i++)
         pthread_join(comp_id[i], NULL);
 
+    //frees memory of the PairList
     sem_wait(&list_mutex);
     freePairList(pList);
     sem_post(&list_mutex);
@@ -116,7 +121,10 @@ void vocalist(int i) {
     // if maxwandering != 0, then sleep
     printf("Vocalist %d: I am wandering...\n", i);
     if(maxWanderTime != 0){
-        //TODO wander for random amount of time
+        //wander for random amount of time
+        int wanderMillis = rand() % (maxWanderTime * 1000);
+        float wander = (float)wanderMillis / 1000.0;
+        sleep(wander);
     }
 
     printf("Vocalist %d: I am ready to make music...\n", i);
@@ -154,7 +162,10 @@ void vocalist(int i) {
         sem_wait(&mutex);
 
         if(maxSoundRoomUsageTime != 0){
-            // TODO wait in room for a random time
+            //wait in room for a random time
+            int roomUsageMillis = rand() % (maxSoundRoomUsageTime * 1000);
+            float roomUsage = (float)roomUsageMillis / 1000.0;
+            sleep(roomUsage);
         }
 
         // release room
@@ -174,7 +185,10 @@ void composer(int i) {
     // if maxwandering != 0, then sleep
     printf("Composer %d: I am wandering...\n", i);
     if(maxWanderTime != 0){
-        //TODO wander for random amount of time
+        //wander for random amount of time
+        int wanderMillis = rand() % (maxWanderTime * 1000);
+        float wander = (float)wanderMillis / 1000.0;
+        sleep(wander);
     }
 
     printf("Composer %d: I am ready to make music...\n", i);
@@ -212,7 +226,10 @@ void composer(int i) {
         sem_wait(&mutex);
 
         if(maxSoundRoomUsageTime != 0){
-            //TODO wait in room for a random time
+            //wait in room for a random time
+            int roomUsageMillis = rand() % (maxSoundRoomUsageTime * 1000);
+            float roomUsage = (float)roomUsageMillis / 1000.0;
+            sleep(roomUsage);
         }
 
         // release room
