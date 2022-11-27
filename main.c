@@ -59,16 +59,17 @@ int main(int argc, char *argv[]) {
         max = composers;
     }
 
+    // Creates the blocking logic for available threads
+    sem_init(&mutex, 0, availableRooms);
+    sem_init(&list_mutex, 0, 1);
+
+    sem_wait(&list_mutex);
+    pList = createPairList();
+    sem_post(&list_mutex);
+
     // threads for vocalists and composers
     pthread_t voc_id[vocalists];
     pthread_t comp_id[composers];
-
-    pList = createPairList();
-
-    // Creates the blocking logic for available threads
-
-    sem_init(&mutex, 0, availableRooms);
-    sem_init(&list_mutex, 0, 1);
 
     // Checks argument to confirm input is valid
     if (argc < 5) {
@@ -108,6 +109,11 @@ int main(int argc, char *argv[]) {
 
     for (int i = 0; i < composers; i++)
         pthread_join(comp_id[i], NULL);
+
+    sem_wait(&list_mutex);
+    freePairList(pList);
+    sem_post(&list_mutex);
+
     return 0;
 }
 
@@ -240,6 +246,20 @@ PairList * createPairList(){
     pl->tail = NULL;
 
     return pl;
+}
+
+void freePairList(PairList *pl){
+    if(pl == NULL){
+        return;
+    }
+
+    Pair *p = pl->head;
+    while(p != NULL){
+        Pair *prevP = p;
+        p = prevP->next;
+        free(prevP);
+    }
+    free(pl);
 }
 
 Pair * addPairToList(PairList *pl){
