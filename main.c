@@ -278,16 +278,16 @@ Pair * findSearchingVoc(int comp) {
     }
 
     while(p != NULL){
-        sem_wait(&list_mutex);
+
         // following criteria for a vocalist looking for a composer
         if(p->voc != -1 && p->comp == -1){
+            sem_wait(&list_mutex);
             //found a vocalist looking for composer, and matching pair made
             p->comp = comp;
             sem_post(&p->match);
             sem_post(&list_mutex);
             return p;
         }
-        sem_post(&list_mutex);
 
         p = p->next;
     }
@@ -306,14 +306,13 @@ Pair * findSearchingComp(int voc) {
     }
 
     while(p != NULL){
-        sem_wait(&list_mutex);
         if(p->comp != -1 && p->voc == -1){
+            sem_wait(&list_mutex);
             p->voc = voc;
             sem_post(&p->match);
             sem_post(&list_mutex);
             return p;
         }
-        sem_post(&list_mutex);
 
         p = p->next;
     }
