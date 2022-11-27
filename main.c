@@ -100,7 +100,6 @@ int main(int argc, char *argv[]) {
     for (int i = 0; i < composers; i++)
         pthread_create(&comp_id [i], NULL, composer, (void *) i);
 
-    // TODO handle finishing threads / joining
     // Waits for all threads to finish executing
     for (int i = 0; i < vocalists; i++)
         pthread_join(voc_id[i], NULL);
@@ -116,7 +115,7 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
-// executes tasks
+// creates the vocalist elements and relations to composer and room
 void vocalist(int i) {
     // if maxwandering != 0, then sleep
     printf("Vocalist %d: I am wandering...\n", i);
@@ -138,7 +137,6 @@ void vocalist(int i) {
         // wait for finish
         sem_wait(&p->finish);
 
-        //TODO handle removing pair from PairList
     }else{
         //create a new pair
         sem_wait(&list_mutex);
@@ -180,6 +178,7 @@ void vocalist(int i) {
     pthread_exit(0);
 }
 
+// Creates the composer elements and relations to vocalist and room
 void composer(int i) {
 
     // if maxwandering != 0, then sleep
@@ -202,7 +201,6 @@ void composer(int i) {
         // wait for finish
         sem_wait(&p->finish);
 
-        //TODO handle removing pair from PairList
     }else{
         //create a new pair
         sem_wait(&list_mutex);
@@ -244,6 +242,7 @@ void composer(int i) {
     pthread_exit(0);
 }
 
+// Creates the list for vocalist/composer pair to go to rooms
 PairList * createPairList(){
     PairList *pl;
     pl = malloc(sizeof(PairList));
@@ -259,6 +258,7 @@ PairList * createPairList(){
     return pl;
 }
 
+// Removes pair of composer and vocalist from list after music has made in room
 void freePairList(PairList *pl){
     if(pl == NULL){
         return;
@@ -273,6 +273,7 @@ void freePairList(PairList *pl){
     free(pl);
 }
 
+// Adds a pair of vocalist/composer to the list for room
 Pair * addPairToList(PairList *pl){
     if(pl == NULL){
         return NULL;
@@ -296,7 +297,7 @@ Pair * addPairToList(PairList *pl){
 
     return p;
 }
-
+// Searches for a Vocalist to put in a pair
 Pair * findSearchingVoc(int comp) {
     if (pList->size == 0) {
         return NULL;
@@ -326,6 +327,7 @@ Pair * findSearchingVoc(int comp) {
     return NULL;
 }
 
+// Searches for a composer to put in a pair
 Pair * findSearchingComp(int voc) {
     if (pList->size == 0) {
         return NULL;
@@ -351,6 +353,7 @@ Pair * findSearchingComp(int voc) {
     return NULL;
 }
 
+// Creates the coupling between composer and vocalist
 Pair * createPair(){
     Pair *p;
     p = malloc(sizeof(Pair));
