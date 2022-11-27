@@ -53,12 +53,6 @@ int main(int argc, char *argv[]) {
     int composers = atoi(argv[3]);
     int availableRooms = atoi(argv[4]);
 
-    // allocate and initialize lists to -1
-    int max = vocalists;
-    if(composers > max){
-        max = composers;
-    }
-
     // Creates the blocking logic for available threads
     sem_init(&mutex, 0, availableRooms);
     sem_init(&list_mutex, 0, 1);
