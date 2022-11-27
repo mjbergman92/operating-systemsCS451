@@ -25,6 +25,7 @@ typedef struct Pair {
 typedef struct PairList {
     int size;
     Pair *head;
+    Pair *tail;
 } PairList;
 
 int maxWanderTime;
@@ -236,6 +237,7 @@ PairList * createPairList(){
 
     pl->size = 0;
     pl->head = NULL;
+    pl->tail = NULL;
 
     return pl;
 }
@@ -251,11 +253,15 @@ Pair * addPairToList(PairList *pl){
         return p;
     }
 
-    p->next = pl->head;
-    pl->head = p;
-    pl->size++;
-
-    printf("Pair Added!\n");
+    if(pl->size == 0){
+        pl->head = p;
+        pl->tail = p;
+        pl->size = 1;
+    }else{
+        pl->tail->next = p;
+        pl->tail = p;
+        pl->size++;
+    }
 
     return p;
 }
@@ -278,6 +284,7 @@ Pair * findSearchingVoc(int comp) {
             //found a vocalist looking for composer, and matching pair made
             p->comp = comp;
             sem_post(&p->match);
+            sem_post(&list_mutex);
             return p;
         }
         sem_post(&list_mutex);
@@ -303,6 +310,7 @@ Pair * findSearchingComp(int voc) {
         if(p->comp != -1 && p->voc == -1){
             p->voc = voc;
             sem_post(&p->match);
+            sem_post(&list_mutex);
             return p;
         }
         sem_post(&list_mutex);
