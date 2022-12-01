@@ -20,11 +20,11 @@ int main(int argc, char **argv){
     //int page_history[1000]; //for LRU
     int fifo_frame = 0; //for FIFO
 
-    for(int i = 0; i < 256; i++){
+    for(int i = 0; i < 256; i++){   //intialize all to invalid
         page_table[i] = -1;
     }
 
-    for(int i = 0; i < 32; i++){
+    for(int i = 0; i < 32; i++){    //initialize all to less than 0, so -1. Would work if 0, but for 
         ram[i] = -1;
     }
 
@@ -38,6 +38,27 @@ int main(int argc, char **argv){
     int count = 0;
     while(fscanf(fp, "%d", &logAdrs) == 1){
         count++;
+        /*
+        *   In binary, in order to get the page number, because the 
+        *   offset is 8-bit, we would do a right shift of 8-bits
+        *   to calculate the page number. Every right shift in binary
+        *   is the equivalent of dividing by 2 (conversely, every left shift is
+        *   multiplying by 2). Dividing by 2, 8 times, is equivalent to dividing
+        *   by 2^8 or 256 once. We can get the page number by dividing the
+        *   logical address by 256. 
+        *
+        *   In binary, in order to get the offset, we make a copy of only the 
+        *   8 least significant bits, essentially removing the more significant bits. 
+        *   This could be done by subtracting one from the 8 most significant bits
+        *   until it equalled zero, although in binary, this is unneccesary. In
+        *   decimal form, integer division is essentially subtracting over and over
+        *   until another subtraction is not possible. Using division, the number of
+        *   subtractions can be done. The remainder after all of the subtracts
+        *   can be found using the modulus operator. Subtracting one from the 8
+        *   most significant bits is equivalent to subtracting 256 from the decimal
+        *   representation. Therefore, we can modulus 256 from the logical
+        *   address to determine the offset.
+        */
         int page = logAdrs / 256;
         int offset = logAdrs % 256;
 
@@ -45,14 +66,15 @@ int main(int argc, char **argv){
         if((frame = page_table[page]) == -1){   //invalid
             pageFaults++;
 
-            page_table[ram[fifo_frame]] = -1;
-            ram[fifo_frame] = page;
-            page_table[page] = fifo_frame;
+            if(ram[fifo_frame] != -1)
+                page_table[ram[fifo_frame]] = -1;   //invalidate page being replaced in ram
+            ram[fifo_frame] = page;                 //load page into ram
+            page_table[page] = fifo_frame;          //set associate frame for page in page table
 
             int physAdrs = fifo_frame * 256 + offset;
             fprintf(outFP, "%d:\t%d\tPage:%d\tFrame:%d\tOffset:%d\n", count, physAdrs, page, fifo_frame, offset);
 
-            fifo_frame = (fifo_frame + 1) % 32;    
+            fifo_frame = (fifo_frame + 1) % 32; //next frame, cycling back to 0 after all 32 frames in ram
         }else{                                  //valid
             int physAdrs = frame * 256 + offset;
             fprintf(outFP, "%d:\t%d\tPage:%d\tFrame:%d\tOffset:%d\tNO_FAULT\n", count, physAdrs, page, frame, offset);
