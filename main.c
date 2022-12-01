@@ -12,6 +12,13 @@
 
 int main(int argc, char **argv){
 
+    /*
+    *   With 8-bit page numbers, there can be 256 different pages
+    *   
+    *   With a total of 2^13 bits of RAM, and each page of data
+    *   having 256 (2^8) bits, that leaves 2^5 number of frames 
+    *   on ram, so 32 frames
+    */
     int page_table[256];
     int ram[32];
 
@@ -63,7 +70,8 @@ int main(int argc, char **argv){
         int offset = logAdrs % 256;
 
         int frame;
-        if((frame = page_table[page]) == -1){   //invalid
+        /* INVALID - PAGE FAULT */
+        if((frame = page_table[page]) == -1){
             pageFaults++;
 
             if(ram[fifo_frame] != -1)
@@ -71,12 +79,18 @@ int main(int argc, char **argv){
             ram[fifo_frame] = page;                 //load page into ram
             page_table[page] = fifo_frame;          //set associate frame for page in page table
 
-            int physAdrs = fifo_frame * 256 + offset;
+            int physAdrs = fifo_frame * 256 + offset;   //remember, multiple by 256 is like left shift 8 in binary
             fprintf(outFP, "%d:\t%d\tPage:%d\tFrame:%d\tOffset:%d\n", count, physAdrs, page, fifo_frame, offset);
 
-            fifo_frame = (fifo_frame + 1) % 32; //next frame, cycling back to 0 after all 32 frames in ram
-        }else{                                  //valid
-            int physAdrs = frame * 256 + offset;
+            /*
+            *   next frame (which is the oldest / the first in), 
+            *   cycling back to 0 after all 32 frames in ram
+            */
+            fifo_frame = (fifo_frame + 1) % 32;
+
+        /* VALID */
+        }else{
+            int physAdrs = frame * 256 + offset;    //remember, multiple by 256 is like left shift 8 in binary
             fprintf(outFP, "%d:\t%d\tPage:%d\tFrame:%d\tOffset:%d\tNO_FAULT\n", count, physAdrs, page, frame, offset);
         }
     }
