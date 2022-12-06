@@ -1,2 +1,13 @@
+Input:
 $ gcc main.c
 $ ./a.out addressesModified.txt
+
+Output:
+The logical addresses corresponding to physical
+addresses given in addressesModified.txt when using FIFO and
+LRU algorithms are available in files
+FIFO_PhysicalAddresses.txt and
+LRU_PhysicalAddresses.txt.
+
+The number of page faults for FIFO was <882>
+The number of page faults for LRU was <879>
