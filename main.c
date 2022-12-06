@@ -95,7 +95,8 @@ int main(int argc, char **argv)
             fifo_page_table[page] = fifo_frame;             // set associate frame for page in page table
 
             int physAdrs = fifo_frame * 256 + offset; // remember, multiple by 256 is like left shift 8 in binary
-            fprintf(fifo_fp, "%d:\t%d\tPage:%d\tFrame:%d\tOffset:%d\n", count, physAdrs, page, fifo_frame, offset);
+            //fprintf(fifo_fp, "%d:\t%d\tPage:%d\tFrame:%d\tOffset:%d\n", count, physAdrs, page, fifo_frame, offset);
+            fprintf(fifo_fp, "%d\n", physAdrs);
 
             /*
              *   next frame (which is the oldest / the first in),
@@ -107,7 +108,8 @@ int main(int argc, char **argv)
         else
         {
             int physAdrs = frame * 256 + offset; // remember, multiple by 256 is like left shift 8 in binary
-            fprintf(fifo_fp, "%d:\t%d\tPage:%d\tFrame:%d\tOffset:%d\tNO_FAULT\n", count, physAdrs, page, frame, offset);
+            //fprintf(fifo_fp, "%d:\t%d\tPage:%d\tFrame:%d\tOffset:%d\tNO_FAULT\n", count, physAdrs, page, frame, offset);
+            fprintf(fifo_fp, "%d\n", physAdrs);
         }
 
         // Using FIFO Algorithm
@@ -124,7 +126,8 @@ int main(int argc, char **argv)
             lru_page_table[page] = least_recently_used;            // set associate frame for page in page table
 
             int physAdrs = least_recently_used * 256 + offset; // remember, multiple by 256 is like left shift 8 in binary
-            fprintf(lru_fp, "%d:\t%d\tPage:%d\tFrame:%d\tOffset:%d\n", count, physAdrs, page, least_recently_used, offset);
+            //fprintf(lru_fp, "%d:\t%d\tPage:%d\tFrame:%d\tOffset:%d\n", count, physAdrs, page, least_recently_used, offset);
+            fprintf(lru_fp, "%d\n", physAdrs);
 
             /*
              *   shift everything else to be less recently used
@@ -140,7 +143,8 @@ int main(int argc, char **argv)
         else
         {
             int physAdrs = frame * 256 + offset; // remember, multiple by 256 is like left shift 8 in binary
-            fprintf(lru_fp, "%d:\t%d\tPage:%d\tFrame:%d\tOffset:%d\tNO_FAULT\n", count, physAdrs, page, frame, offset);
+            //fprintf(lru_fp, "%d:\t%d\tPage:%d\tFrame:%d\tOffset:%d\tNO_FAULT\n", count, physAdrs, page, frame, offset);
+            fprintf(lru_fp, "%d\n", physAdrs);
 
             /*
              *   find the index in the lru "stack"
@@ -163,6 +167,8 @@ int main(int argc, char **argv)
             lru[31] = frame;
         }
     }
+
+    printf("\nThe logical addresses corresponding to physical\naddresses given in %s when using FIFO and\nLRU algorithms are available in files \nFIFO_PhysicalAddresses.txt and \nLRU_PhysicalAddresses.txt.\n\n", argv[1]);
 
     printf("The number of page faults for FIFO was <%d>\n", fifo_page_faults);
     printf("The number of page faults for LRU was <%d>\n", lru_page_faults);
